@@ -63,10 +63,15 @@ namespace FileTransfer
 
         private async void Share_Click(object sender, EventArgs e)
         {
+            if (String.IsNullOrEmpty(textBox1.Text))
+            {
+                MessageBox.Show("Please select Directory");
+                return;
+            }
 
             FtpSettings ftpSettings = AppSettings.GetFtpSettings();
 
-            Parallel.ForEach(ftpSettings.Servers, async item =>
+            await Parallel.ForEachAsync(ftpSettings.Servers, async (item, cancellationToken) =>
             {
                 // create Serilog logger
                 var serilogLogger = new LoggerConfiguration()
@@ -82,7 +87,6 @@ namespace FileTransfer
                 //IFtpClientWrapper ftpClientWrapper = new FluentFtpClientWrapper("192.168.1.99", "magnusminds", "admin", ftpClientLogger);
                 IFtpClientWrapper ftpClientWrapper = new FluentFtpClientWrapper(item, ftpClientLogger);
                 IUploadManager uploadManager = new UploadManager(ftpClientWrapper, uploadLogger);
-
                 Stopwatch sw = Stopwatch.StartNew();
                 sw.Start();
                 uploadLogger.LogInformation("File uploading started");
@@ -97,8 +101,11 @@ namespace FileTransfer
                 }
 
                 uploadLogger.LogInformation($"It takes " + sw.Elapsed.TotalMinutes + " minutes to upload - " + item.Name);
+
                 sw.Stop();
             });
+
+            MessageBox.Show("File transfer successfully.");
         } 
     }
 }
