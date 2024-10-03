@@ -74,10 +74,13 @@ namespace FileTransfer
             await Parallel.ForEachAsync(ftpSettings.Servers, async (item, cancellationToken) =>
             {
                 // create Serilog logger
+                // create Serilog logger
+
                 var serilogLogger = new LoggerConfiguration()
                                         .MinimumLevel.Debug()
-                                        .WriteTo.File(Path.Combine("logs", $"Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}.txt"), rollingInterval: RollingInterval.Day)
+                                        .WriteTo.File(Path.Combine("logs", $"Log_{DateTime.Now:yyyy-MM-dd_HH-mm-ss}_{item.Name}.txt"), rollingInterval: RollingInterval.Day)
                                         .CreateLogger();
+
 
                 var loggerFactory = new LoggerFactory().AddSerilog(serilogLogger);
 
